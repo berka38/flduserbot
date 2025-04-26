@@ -1,0 +1,34 @@
+{# Define the modal as a macro block for reusability #}
+{% macro premium_info_modal() %}
+{# Macro needs access to bot_limits defined in the calling template, passed via 'with context' #}
+{# Remove the redundant set statement as 'with context' should provide it #}
+{# {% set bot_limits = bot_limits %} #}
+<div class="modal fade" id="premiumModal" tabindex="-1" aria-labelledby="premiumModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="premiumModalLabel"><i class="fas fa-star text-warning me-2"></i>{{ _('Upgrade to Premium') }}</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <p>{{ _('Unlock the full potential with a Premium account!') }}</p>
+        <h6>{{ _('Premium Benefits Include') }}:</h6>
+        <ul>
+            <li><i class="fas fa-robot text-primary me-1"></i> {{ _('Add up to %(limit)s bot accounts.', limit=bot_limits['premium']) }}</li>
+            <li><i class="fas fa-terminal text-primary me-1"></i> {{ _('Unlimited custom commands.') }}</li>
+            <li><i class="fas fa-comments text-primary me-1"></i> {{ _('Unlimited command response length.') }}</li>
+            <li><i class="fas fa-bolt text-primary me-1"></i> {{ _('Unlimited monthly command usage.') }}</li>
+            {# Add more benefits here as they are implemented #}
+        </ul>
+        <hr>
+        <h6>{{ _('How to Upgrade') }}:</h6>
+        <p>{{ _('To upgrade your account to Premium, please contact the administrator:') }}</p>
+        <p><strong>{{ _('Contact Info') }}:</strong> <a href="https://t.me/mrfurkanbey" target="_blank">@mrfurkanbey</a> {{ _('on Telegram') }}</p> {# Placeholder contact info #}
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{{ _('Close') }}</button>
+      </div>
+    </div>
+  </div>
+</div>
+{% endmacro %} 

@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% from "bootstrap4/form.html" import render_form %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2>{{ _('Add New Telegram Bot Account') }}</h2>
+    <p>{{ _('Please enter your Telegram API details and phone number.') }}</p>
+    <hr>
+    <div class="row">
+        <div class="col-md-8 offset-md-2">
+            {{ render_form(form) }}
+        </div>
+    </div>
+</div>
+{% endblock %} 

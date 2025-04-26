@@ -1,0 +1,162 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2><i class="fas fa-user-shield me-2"></i>{{ title }}</h2>
+    <p>{{ _('Welcome to the administration area.') }}</p>
+    <hr>
+
+    {# Statistics Row #}
+    <div class="row g-3 mb-4">
+        <div class="col-lg-3 col-md-6">
+            <div class="card text-white bg-primary h-100">
+                <div class="card-body">
+                    <h5 class="card-title"><i class="fas fa-users me-2"></i>{{ _('Total Users') }}</h5>
+                    <p class="card-text fs-4 fw-bold">{{ total_users }}</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-3 col-md-6">
+            <div class="card text-white bg-info h-100">
+                <div class="card-body">
+                    <h5 class="card-title"><i class="fab fa-telegram me-2"></i>{{ _('Total Bots') }}</h5>
+                    <p class="card-text fs-4 fw-bold">{{ total_bots }}</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-3 col-md-6">
+            <div class="card text-white bg-success h-100">
+                <div class="card-body">
+                    <h5 class="card-title"><i class="fas fa-robot me-2"></i>{{ _('Active Bots') }}</h5>
+                    <p class="card-text fs-4 fw-bold">{{ active_bots_count }}</p>
+                </div>
+            </div>
+        </div>
+         <div class="col-lg-3 col-md-6">
+            <div class="card text-dark bg-light h-100">
+                <div class="card-body">
+                    <h5 class="card-title"><i class="fas fa-terminal me-2"></i>{{ _('Total Commands') }}</h5>
+                    <p class="card-text fs-4 fw-bold">{{ total_custom_commands + total_python_commands }}</p>
+                     <small class="text-muted">({{ _('Custom') }}: {{ total_custom_commands }}, {{ _('Python') }}: {{ total_python_commands }})</small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {# User Registration Chart Row #}
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <i class="fas fa-chart-line me-2"></i>{{ _('User Registrations (Last 7 Days)') }}
+                </div>
+                <div class="card-body">
+                    <canvas id="userRegistrationChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <h4 class="mt-4">{{ _('Management Sections') }}</h4>
+    {# Management Links Row #}
+    <div class="row g-3">
+        {# User Management Card #}
+        <div class="col-md-6 col-lg-4">
+            <div class="card h-100">
+                <div class="card-body">
+                    <h5 class="card-title"><i class="fas fa-users me-2"></i>{{ _('User Management') }}</h5>
+                    <p class="card-text">{{ _('View, edit, and manage user accounts.') }}</p>
+                    <a href="{{ url_for('admin.list_users') }}" class="btn btn-primary"><i class="fas fa-arrow-right me-1"></i>{{ _('Manage Users') }}</a>
+                </div>
+            </div>
+        </div>
+
+        {# Affiliate Earnings Card #}
+        <div class="col-md-6 col-lg-4">
+            <div class="card h-100">
+                <div class="card-body">
+                    <h5 class="card-title"><i class="fas fa-dollar-sign me-2"></i>{{ _('Affiliate Earnings') }}</h5>
+                    <p class="card-text">{{ _('Review and manage affiliate commission payouts.') }}</p>
+                    <a href="{{ url_for('admin.manage_earnings') }}" class="btn btn-success"><i class="fas fa-arrow-right me-1"></i>{{ _('Manage Earnings') }}</a>
+                </div>
+            </div>
+        </div>
+        
+        {# Python Command Review Card #}
+        <div class="col-md-6 col-lg-4">
+            <div class="card h-100">
+                <div class="card-body">
+                    <h5 class="card-title">
+                        <i class="fab fa-python me-2"></i>{{ _('Python Commands') }}
+                        {% if pending_python_commands_count > 0 %}
+                            <span class="badge bg-warning ms-2">{{ pending_python_commands_count }} {{ _('Pending') }}</span>
+                        {% endif %}
+                    </h5>
+                    <p class="card-text">{{ _('Review and approve/reject user-submitted Python commands.') }}</p>
+                    <a href="{{ url_for('admin.review_python_commands') }}" class="btn btn-info">
+                        <i class="fas fa-check-double me-1"></i>{{ _('Review Commands') }}
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        {# Add more cards for other admin sections as needed #}
+
+    </div> 
+
+</div>
+{% endblock %}
+
+{# Add script block for Chart.js initialization #}
+{% block scripts %}
+{{ super() }} {# Include base scripts like Chart.js #}
+<script>
+    // Get JSON strings from Jinja context
+    const userRegLabelsJson = '{{ user_reg_labels | safe }}';
+    const userRegCountsJson = '{{ user_reg_counts | safe }}';
+
+    // Parse JSON strings into JavaScript arrays
+    let userRegLabels = [];
+    let userRegCounts = [];
+    try {
+        userRegLabels = JSON.parse(userRegLabelsJson);
+        userRegCounts = JSON.parse(userRegCountsJson);
+    } catch (e) {
+        console.error("Error parsing chart data:", e);
+        // Provide fallback empty data if parsing fails
+    }
+
+    const userRegCtx = document.getElementById('userRegistrationChart').getContext('2d');
+    const userRegistrationChart = new Chart(userRegCtx, {
+        type: 'line',
+        data: {
+            labels: userRegLabels, // Use parsed JS array
+            datasets: [{
+                label: '{{ _("New Users") }}',
+                data: userRegCounts, // Use parsed JS array
+                borderColor: 'rgb(75, 192, 192)',
+                tension: 0.1,
+                fill: false,
+            }],
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        stepSize: 1,
+                        precision: 0,
+                    },
+                },
+            },
+            plugins: {
+                 legend: {
+                    display: true,
+                },
+            },
+        },
+    });
+</script>
+{% endblock %} 

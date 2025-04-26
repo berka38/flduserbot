@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-4">
+    <h3><i class="fas fa-bell me-2"></i>{{ _('Notifications') }}</h3>
+    <hr>
+
+    {% if notifications %}
+        <div class="list-group shadow-sm">
+            {% for notification in notifications %}
+                <div class="list-group-item list-group-item-action {{ 'list-group-item-light' if notification.is_read else 'list-group-item-warning fw-bold' }}" aria-current="{{ 'false' if notification.is_read else 'true' }}">
+                    <div class="d-flex w-100 justify-content-between">
+                        <p class="mb-1">{{ notification.get_message() }}</p>
+                        <small title="{{ notification.timestamp.strftime('%Y-%m-%d %H:%M:%S') }} UTC">{{ notification.timestamp.strftime('%H:%M') }}</small>
+                    </div>
+                    {# <small>Optional details or link here.</small> #}
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="alert alert-info" role="alert">
+            <i class="fas fa-info-circle"></i> {{ _('You have no notifications.') }}
+        </div>
+    {% endif %}
+
+    {# TODO: Add pagination if list gets long #}
+    {# TODO: Add clear all button? #}
+
+</div>
+{% endblock %} 

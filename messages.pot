@@ -1,0 +1,404 @@
+# Translations template for PROJECT.
+# Copyright (C) 2025 ORGANIZATION
+# This file is distributed under the same license as the PROJECT project.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2025.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PROJECT VERSION\n"
+"Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
+"POT-Creation-Date: 2025-04-26 16:18+0300\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.17.0\n"
+
+#: app/admin/routes.py:18 app/templates/base.html:61
+msgid "Admin Panel"
+msgstr ""
+
+#: app/admin/routes.py:26 app/templates/admin/list_users.html:5
+msgid "User List"
+msgstr ""
+
+#: app/admin/routes.py:35
+msgid "You cannot delete yourself."
+msgstr ""
+
+#: app/admin/routes.py:73
+#, python-brace-format
+msgid "User '{username}' deleted successfully."
+msgstr ""
+
+#: app/admin/routes.py:76
+#, python-format
+msgid "Database error while deleting user: %(error)s"
+msgstr ""
+
+#: app/admin/routes.py:89
+msgid "You cannot remove your own admin privileges."
+msgstr ""
+
+#: app/admin/routes.py:93
+#, python-brace-format
+msgid "User '{username}' updated successfully."
+msgstr ""
+
+#: app/admin/routes.py:102
+#, python-brace-format
+msgid "Edit User '{username}'"
+msgstr ""
+
+#: app/auth/routes.py:19
+msgid "Invalid username or password"
+msgstr ""
+
+#: app/auth/routes.py:23
+msgid "Login successful!"
+msgstr ""
+
+#: app/auth/routes.py:38
+msgid "Congratulations, you are now a registered user! You can now log in."
+msgstr ""
+
+#: app/auth/routes.py:45
+msgid "You have been logged out successfully."
+msgstr ""
+
+#: app/bot/routes.py:25 app/templates/bot/dashboard.html:5
+msgid "Bot Management Panel"
+msgstr ""
+
+#: app/bot/routes.py:44
+msgid "Telegram account added. You should now initiate the login process."
+msgstr ""
+
+#: app/bot/routes.py:52 app/templates/bot/dashboard.html:57
+msgid "Add New Bot Account"
+msgstr ""
+
+#: app/bot/routes.py:59 app/bot/routes.py:168
+msgid "You do not have permission to access this account."
+msgstr ""
+
+#: app/bot/routes.py:63
+#, python-format
+msgid "Login process for %(phone)s has already been started or completed."
+msgstr ""
+
+#: app/bot/routes.py:111
+#, python-format
+msgid "Verification code sent to %(phone)s."
+msgstr ""
+
+#: app/bot/routes.py:124
+#, python-format
+msgid "Account %(phone)s was already active (session updated)."
+msgstr ""
+
+#: app/bot/routes.py:127
+#, python-format
+msgid "Account %(phone)s was already active but failed to get session."
+msgstr ""
+
+#: app/bot/routes.py:137 app/bot/routes.py:263
+#, python-format
+msgid "Too many attempts. Please try again in %(seconds)s seconds."
+msgstr ""
+
+#: app/bot/routes.py:145
+#, python-format
+msgid "An error occurred while sending the code: %(error)s"
+msgstr ""
+
+#: app/bot/routes.py:160
+#, python-format
+msgid "An internal error occurred while starting login: %(error)s"
+msgstr ""
+
+#: app/bot/routes.py:172
+msgid "Code entry is not expected for this account."
+msgstr ""
+
+#: app/bot/routes.py:178
+msgid "Login session not found or expired. Please start again."
+msgstr ""
+
+#: app/bot/routes.py:193
+msgid "Session information missing. Please start login again."
+msgstr ""
+
+#: app/bot/routes.py:227
+#, python-format
+msgid "Account %(phone)s activated successfully!"
+msgstr ""
+
+#: app/bot/routes.py:231
+msgid ""
+"Login successful but failed to retrieve the final session key. The bot "
+"cannot be started."
+msgstr ""
+
+#: app/bot/routes.py:247
+msgid "The verification code entered is invalid."
+msgstr ""
+
+#: app/bot/routes.py:253
+msgid ""
+"Two-factor authentication (2FA) is enabled for this account, which is not"
+" currently supported by this tool."
+msgstr ""
+
+#: app/bot/routes.py:271
+#, python-format
+msgid "An error occurred during code verification: %(error)s"
+msgstr ""
+
+#: app/bot/routes.py:289
+#, python-format
+msgid "An internal error occurred while processing code: %(error)s"
+msgstr ""
+
+#: app/templates/base.html:29
+msgid "Home"
+msgstr ""
+
+#: app/templates/base.html:33
+msgid "Bot Management"
+msgstr ""
+
+#: app/templates/base.html:40
+msgid "Language"
+msgstr ""
+
+#: app/templates/auth/login.html:8 app/templates/base.html:49
+#: app/templates/main/index.html:19
+msgid "Login"
+msgstr ""
+
+#: app/templates/auth/register.html:8 app/templates/base.html:52
+#: app/templates/main/index.html:22
+msgid "Register"
+msgstr ""
+
+#: app/templates/base.html:57 app/templates/bot/dashboard.html:6
+#: app/templates/main/index.html:12
+msgid "Hello"
+msgstr ""
+
+#: app/templates/base.html:64
+msgid "Logout"
+msgstr ""
+
+#: app/templates/admin/edit_user.html:6
+msgid "Edit User"
+msgstr ""
+
+#: app/templates/admin/edit_user.html:15
+#: app/templates/bot/edit_custom_command.html:16
+msgid "Cancel and Return to List"
+msgstr ""
+
+#: app/templates/admin/list_users.html:6
+msgid "Return to Admin Panel"
+msgstr ""
+
+#: app/templates/admin/list_users.html:14
+msgid "Username"
+msgstr ""
+
+#: app/templates/admin/list_users.html:15
+msgid "Email"
+msgstr ""
+
+#: app/templates/admin/list_users.html:16
+msgid "Role"
+msgstr ""
+
+#: app/templates/admin/list_users.html:17
+#: app/templates/bot/list_commands.html:18
+msgid "Actions"
+msgstr ""
+
+#: app/templates/admin/list_users.html:32
+msgid "Details/Edit"
+msgstr ""
+
+#: app/templates/admin/list_users.html:35 app/templates/bot/dashboard.html:45
+#: app/templates/bot/list_commands.html:43
+msgid "Delete"
+msgstr ""
+
+#: app/templates/admin/list_users.html:44
+msgid "No registered users found yet."
+msgstr ""
+
+#: app/templates/auth/login.html:12
+msgid "Don't have an account?"
+msgstr ""
+
+#: app/templates/auth/login.html:12
+msgid "Register."
+msgstr ""
+
+#: app/templates/auth/login.html:15
+msgid "Forgot your password?"
+msgstr ""
+
+#: app/templates/auth/register.html:12
+msgid "Already have an account?"
+msgstr ""
+
+#: app/templates/auth/register.html:12
+msgid "Login."
+msgstr ""
+
+#: app/templates/bot/add_bot.html:6
+msgid "Add New Telegram Bot Account"
+msgstr ""
+
+#: app/templates/bot/add_bot.html:7
+msgid "Please enter your Telegram API details and phone number."
+msgstr ""
+
+#: app/templates/bot/add_custom_command.html:6
+msgid "Add New Command for Account"
+msgstr ""
+
+#: app/templates/bot/add_custom_command.html:14
+#: app/templates/bot/list_commands.html:7
+msgid "Return to Dashboard"
+msgstr ""
+
+#: app/templates/bot/dashboard.html:9
+msgid "Your Telegram Accounts"
+msgstr ""
+
+#: app/templates/bot/dashboard.html:14 app/templates/bot/list_commands.html:17
+msgid "Status"
+msgstr ""
+
+#: app/templates/bot/dashboard.html:21
+msgid "Start/Retry Login"
+msgstr ""
+
+#: app/templates/bot/dashboard.html:23
+msgid "Enter Code"
+msgstr ""
+
+#: app/templates/bot/dashboard.html:29
+msgid "Stop Bot"
+msgstr ""
+
+#: app/templates/bot/dashboard.html:34
+msgid "Start Bot"
+msgstr ""
+
+#: app/templates/bot/dashboard.html:39
+msgid "Manage Commands"
+msgstr ""
+
+#: app/templates/bot/dashboard.html:39
+msgid "Manage"
+msgstr ""
+
+#: app/templates/bot/dashboard.html:41
+msgid "Add Command"
+msgstr ""
+
+#: app/templates/bot/dashboard.html:53
+msgid "You haven't added any Telegram accounts yet."
+msgstr ""
+
+#: app/templates/bot/edit_custom_command.html:6
+msgid "Edit Command"
+msgstr ""
+
+#: app/templates/bot/edit_custom_command.html:7
+msgid "Account"
+msgstr ""
+
+#: app/templates/bot/list_commands.html:5
+msgid "Custom Commands for Account"
+msgstr ""
+
+#: app/templates/bot/list_commands.html:6
+msgid "Add New Command"
+msgstr ""
+
+#: app/templates/bot/list_commands.html:15
+msgid "Trigger"
+msgstr ""
+
+#: app/templates/bot/list_commands.html:16
+msgid "Response (First 50 chars)"
+msgstr ""
+
+#: app/templates/bot/list_commands.html:29
+msgid "Active"
+msgstr ""
+
+#: app/templates/bot/list_commands.html:29
+msgid "Inactive"
+msgstr ""
+
+#: app/templates/bot/list_commands.html:36
+msgid "Toggle Active/Inactive"
+msgstr ""
+
+#: app/templates/bot/list_commands.html:36
+msgid "Deactivate"
+msgstr ""
+
+#: app/templates/bot/list_commands.html:36
+msgid "Activate"
+msgstr ""
+
+#: app/templates/bot/list_commands.html:39
+msgid "Edit"
+msgstr ""
+
+#: app/templates/bot/list_commands.html:52
+msgid "No custom commands defined for this account yet."
+msgstr ""
+
+#: app/templates/bot/login_code.html:6
+msgid "Enter Verification Code"
+msgstr ""
+
+#: app/templates/bot/login_code.html:7
+msgid "Please enter the Telegram verification code sent to"
+msgstr ""
+
+#: app/templates/bot/login_code.html:15
+msgid "Cancel and Return to Dashboard"
+msgstr ""
+
+#: app/templates/main/index.html:7
+msgid "Telegram UserBot Management"
+msgstr ""
+
+#: app/templates/main/index.html:8
+msgid ""
+"Take your Telegram experience to the next level! Easily manage your "
+"userbots, add commands, and create automations with this platform."
+msgstr ""
+
+#: app/templates/main/index.html:12
+msgid "You can start managing your bots by going to the management panel."
+msgstr ""
+
+#: app/templates/main/index.html:14
+msgid "Go to Management Panel"
+msgstr ""
+
+#: app/templates/main/index.html:17
+msgid ""
+"Create an account or log in to add your bots and take advantage of all "
+"features."
+msgstr ""
+

@@ -1,0 +1,108 @@
+{% extends "base.html" %}
+{% from "bootstrap5/pagination.html" import render_pagination %}
+{% from "bootstrap5/form.html" import render_form %}
+{# Import macro for rendering stars #}
+{% import "macros/star_rating.html" as stars %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        {# Sidebar for Categories #}
+        <div class="col-lg-3 mb-4 mb-lg-0">
+             <div class="list-group shadow-sm">
+                 <a href="{{ url_for('main.market') }}" class="list-group-item list-group-item-action {{ 'active' if not selected_category else '' }}">
+                     <i class="fas fa-list me-2"></i>{{ _('All Commands') }}
+                 </a>
+                 {% for category in categories %}
+                 <a href="{{ url_for('main.market', category=category.slug) }}" 
+                    class="list-group-item list-group-item-action {{ 'active' if selected_category and selected_category.id == category.id else '' }}">
+                     {{ category.name }}
+                     {# Optional: Show command count per category? #}
+                     {# <span class="badge bg-secondary float-end">{{ category.commands.count() }}</span> #}
+                 </a>
+                 {% endfor %}
+             </div>
+        </div>
+
+        {# Main Content Area #}
+        <div class="col-lg-9">
+            <h2>
+                <i class="fas fa-store me-2"></i>{{ _('Python Command Market') }}
+                {% if selected_category %}
+                    <small class="text-muted"> / {{ selected_category.name }}</small>
+                {% endif %}
+            </h2>
+            <p class="text-muted">{{ _('Discover and add publicly shared Python commands created by other users.') }}</p>
+            <hr>
+
+            {% if commands %}
+                <div class="row row-cols-1 row-cols-md-2 g-4">
+                    {% for command in commands %}
+                    {# Calculate average rating #}
+                    {% set avg_rating = command.ratings | map(attribute='rating') | average %}
+                    {% set num_ratings = command.ratings | length %}
+                    <div class="col">
+                        <div class="card h-100 shadow-sm">
+                            <div class="card-header bg-light">
+                                <h5 class="card-title mb-0">
+                                    {# Link the trigger to the detail page #}
+                                    <a href="{{ url_for('main.command_detail', command_id=command.id) }}" class="text-decoration-none"><code>{{ command.trigger }}</code></a>
+                                </h5>
+                            </div>
+                            <div class="card-body">
+                                {# Truncate description? #}
+                                <p class="card-text">{{ command.description[:100] ~ ('...' if command.description|length > 100 else '') }}</p>
+                                <p class="card-text"><small class="text-muted">{{ _('Shared by') }}: {{ command.submitter.username if command.submitter else 'N/A' }}</small></p>
+                                {# Display Categories #}
+                                <div class="mb-2">
+                                    {% for cat in command.categories %}
+                                        <a href="{{ url_for('main.market', category=cat.slug) }}" class="badge bg-info text-decoration-none">{{ cat.name }}</a>
+                                    {% endfor %}
+                                </div>
+                                {# Display Average Rating #}
+                                <div class="mb-2">
+                                    {{ stars.render_stars(avg_rating, num_ratings) }}
+                                </div>
+                            </div>
+                            <div class="card-footer d-flex justify-content-between align-items-center">
+                                {# Button to trigger adding the command #}
+                                <a href="{{ url_for('bot.add_command_from_market_select_account', original_command_id=command.id) }}" class="btn btn-sm btn-primary">
+                                    <i class="fas fa-plus-circle me-1"></i>{{ _('Add to Account') }}
+                                </a>
+                                {# Button to open rating modal #}
+                                <button type="button" class="btn btn-sm btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#rateCommandModal-{{ command.id }}">
+                                    <i class="fas fa-star me-1"></i> {{ _('Rate') }}
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+
+                {# Pagination #}
+                <div class="mt-4">
+                    {{ render_pagination(pagination, align='center') }}
+                </div>
+
+            {% else %}
+                <div class="alert alert-info" role="alert">
+                    <i class="fas fa-info-circle"></i> 
+                    {% if selected_category %}
+                        {{ _('No public commands found in the category \'%(category_name)s\'.', category_name=selected_category.name) }}
+                    {% else %}
+                        {{ _('No public Python commands found in the market yet.') }}
+                    {% endif %}
+                </div>
+            {% endif %}
+        </div> {# End Main Content Area #}
+    </div> {# End Row #}
+</div>
+
+{# --- Rating Modals (Include for each command) --- #}
+{% if commands %}
+    {% for command in commands %}
+        @include('main/_rate_command_modal.html', command=command) 
+    {% endfor %}
+{% endif %}
+
+{% endblock %} 

@@ -1,0 +1,101 @@
+{% extends "base.html" %}
+
+{# Define bot limits for easy access #}
+{% set bot_limits = {'user': 1, 'premium': 5, 'admin': 1000} %} {# Using a large number for admin instead of inf #}
+{% set user_role = current_user.role if current_user.role else 'user' %}
+{% set user_bot_limit = bot_limits.get(user_role, bot_limits['user']) %}
+{% set can_add_bot = accounts|length < user_bot_limit %}
+
+{% block content %}
+{# Import the macro from the separate file, making context available #}
+{% from 'macros.html' import premium_info_modal with context %}
+
+<div class="container mt-4">
+    <h2>{{ _('Bot Management Panel') }}</h2>
+    <p>{{ _('Hello') }}, {{ current_user.username }}! 
+        ({{ _('Role') }}: <span class="badge bg-info">{{ current_user.role|capitalize }}</span>, 
+         {{ _('Bots') }}: {{ accounts|length }} / {{ user_bot_limit if user_bot_limit < 1000 else '∞' }} )
+    </p>
+    <hr>
+
+    <h4>{{ _('Your Telegram Accounts') }}</h4>
+    {% if accounts %}
+        <ul class="list-group mb-3">
+            {% for account in accounts %}
+                <li class="list-group-item d-flex justify-content-between align-items-center flex-wrap">
+                    <div class="me-auto mb-2 mb-md-0"> {# Ensure phone number stays on left #}
+                        <i class="fab fa-telegram me-1"></i>{{ account.phone_number }} - 
+                        <span class="badge rounded-pill bg-{{ 'success' if account.status == 'active' else ('warning' if account.status == 'pending_code' else 'secondary') }}">
+                            {{ account.status | replace('_', ' ') | title }} {# Better status display #}
+                        </span>
+                        {% set is_running = account.id in running_bots %}
+                        {% if account.status == 'active' and is_running %}
+                        <span class="badge rounded-pill bg-success ms-1"><i class="fas fa-robot me-1"></i>{{ _('Bot Running') }}</span>
+                        {% elif account.status == 'active' and not is_running %}
+                        <span class="badge rounded-pill bg-secondary ms-1"><i class="fas fa-power-off me-1"></i>{{ _('Bot Stopped') }}</span>
+                        {% endif %}
+                    </div>
+                    <div class="btn-group btn-group-sm" role="group" aria-label="Account Actions"> {# Group buttons #}
+                        {% if account.status in ['pending_login', 'error', 'error_session', 'error_2fa_needed'] %}
+                            <a href="{{ url_for('bot.start_login', account_id=account.id) }}" class="btn btn-info" title="{{ _('Start/Retry Login') }}"><i class="fas fa-sign-in-alt"></i></a>
+                        {% elif account.status == 'pending_code' %}
+                            <a href="{{ url_for('bot.login_code', account_id=account.id) }}" class="btn btn-warning" title="{{ _('Enter Code') }}"><i class="fas fa-keyboard"></i></a>
+                        {% elif account.status == 'active' %}
+                            {% if is_running %}
+                                <form action="{{ url_for('bot.stop_runner', account_id=account.id) }}" method="post" class="d-inline">
+                                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                                    <button type="submit" class="btn btn-warning" title="{{ _('Stop Bot') }}"><i class="fas fa-stop-circle"></i></button>
+                                </form>
+                            {% else %}
+                                <form action="{{ url_for('bot.start_runner', account_id=account.id) }}" method="post" class="d-inline">
+                                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                                    <button type="submit" class="btn btn-success" title="{{ _('Start Bot') }}"><i class="fas fa-play-circle"></i></button>
+                                </form>
+                            {% endif %}
+                        {% endif %}
+                        <!-- Manage Commands Link -->
+                        <a href="{{ url_for('bot.list_custom_commands', account_id=account.id) }}" class="btn btn-outline-secondary" title="{{ _('Manage Commands') }}"><i class="fas fa-list-ul"></i></a>
+                        <!-- Add Command Link -->
+                        {# <a href="{{ url_for('bot.add_custom_command', account_id=account.id) }}" class="btn btn-outline-primary ms-1">{{ _('Add Command') }}</a> #} {# Removed for simplicity, add on commands page #}
+                        <!-- Delete button -->
+                        {# Pass phone number directly to gettext for formatting #}
+                        {% set phone_number_escaped = account.phone_number | replace("'", "\\'") %}
+                        {% set delete_confirm_msg = _('Are you sure you want to delete account \'%(phone)s\' and stop any running bot?', phone=phone_number_escaped) %}
+                        <form action="{{ url_for('bot.delete_bot', account_id=account.id) }}" method="post" class="d-inline" 
+                              onsubmit='return confirm("{{ delete_confirm_msg }}");'>
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                            <button type="submit" class="btn btn-danger" title="{{ _('Delete') }}"><i class="fas fa-trash-alt"></i></button>
+                        </form>
+                    </div>
+                </li>
+            {% endfor %}
+        </ul>
+    {% else %}
+        <div class="alert alert-info" role="alert">
+           <i class="fas fa-info-circle"></i> {{ _('You haven\'t added any Telegram accounts yet.') }}
+        </div>
+    {% endif %}
+
+    {# Add New Bot Button / Limit Info / Upgrade Button #}
+    {% if can_add_bot %}
+        <a href="{{ url_for('bot.add_bot') }}" class="btn btn-primary"><i class="fas fa-plus"></i> {{ _('Add New Bot Account') }}</a>
+    {% else %}
+         <div class="alert alert-warning d-inline-block me-2 align-middle" role="alert" style="margin-bottom: 0;">
+             <i class="fas fa-exclamation-triangle"></i> 
+             {{ _('You have reached the maximum limit of %(limit)s bot accounts for your account type.', limit=user_bot_limit) }}
+             {# Show upgrade button only if user is not admin and not premium #}
+             {% if not current_user.is_admin() and not current_user.is_premium() %}
+                 <button type="button" class="btn btn-sm btn-success ms-2" data-bs-toggle="modal" data-bs-target="#premiumModal">
+                     <i class="fas fa-star me-1"></i> {{ _('Upgrade to Premium') }}
+                 </button>
+             {% endif %}
+        </div>
+        <button class="btn btn-primary" disabled><i class="fas fa-plus"></i> {{ _('Add New Bot Account') }}</button>
+    {% endif %}
+
+</div>
+
+{# Call the imported macro (without self.) #}
+{{ premium_info_modal() }}
+
+{% endblock %} 

@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% from "bootstrap5/form.html" import render_form %}
+
+{% block content %}
+<div class="container mt-4">
+    <h3><i class="fab fa-python me-2"></i>{{ _('Add Python Command') }}</h3>
+    <p>{{ _('Submit a custom command written in Python for account') }} <strong>{{ account.phone_number }}</strong>.</p>
+    <p class="small text-muted">{{ _('Your command will be reviewed by an administrator before it becomes active.') }}</p>
+    <hr>
+
+    {# Security Warning #}
+    <div class="alert alert-danger" role="alert">
+      <h4 class="alert-heading"><i class="fas fa-shield-alt me-2"></i>{{ _('Security Warning!') }}</h4>
+      <p>{{ _('Executing custom Python code can be risky. Ensure your code is safe and does not contain malicious logic. Submitted code will be reviewed, but you are responsible for its behavior.') }}</p>
+      <hr>
+      <p class="mb-0">{{ _('Do not include sensitive information like passwords or API keys directly in your code.') }}</p>
+    </div>
+
+    <div class="row">
+        <div class="col-md-8 offset-md-2">
+             {{ render_form(form) }}
+        </div>
+    </div>
+
+    <div class="mt-3">
+         <a href="{{ url_for('bot.list_custom_commands', account_id=account.id) }}" class="btn btn-secondary btn-sm">
+            <i class="fas fa-arrow-left"></i> {{ _('Cancel and Return to Command List') }}
+         </a>
+    </div>
+
+</div>
+{% endblock %} 

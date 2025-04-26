@@ -1,0 +1,95 @@
+{% extends "base.html" %}
+{% from "bootstrap5/pagination.html" import render_pagination %}
+
+{% block content %}
+<div class="container mt-4">
+    <h3><i class="fas fa-hand-holding-usd me-2"></i>{{ _('Manage Affiliate Earnings') }}</h3>
+    <a href="{{ url_for('admin.index') }}" class="btn btn-secondary btn-sm mb-3"><i class="fas fa-arrow-left"></i> {{ _('Return to Admin Panel') }}</a>
+    <hr>
+
+    {% if earnings %}
+    <div class="table-responsive">
+        <table class="table table-sm table-striped table-hover align-middle">
+            <thead>
+                <tr>
+                    <th>{{ _('ID') }}</th>
+                    <th>{{ _('Date') }}</th>
+                    <th>{{ _('Affiliate') }}</th>
+                    <th>{{ _('Referred User') }}</th>
+                    <th class="text-end">{{ _('Amount') }}</th>
+                    <th>{{ _('Status') }}</th>
+                    <th>{{ _('Notes') }}</th>
+                    <th class="text-center">{{ _('Actions') }}</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for earning in earnings %}
+                <tr>
+                    <td>{{ earning.id }}</td>
+                    <td title="{{ earning.timestamp.strftime('%Y-%m-%d %H:%M:%S') }} UTC">{{ earning.timestamp.strftime('%Y-%m-%d') }}</td>
+                    <td>{{ earning.affiliate.username if earning.affiliate else 'N/A' }} (ID: {{ earning.affiliate_id }})</td>
+                    <td>{{ earning.referred_user.username if earning.referred_user else 'N/A' }} (ID: {{ earning.referred_user_id }})</td>
+                    <td class="text-end">{{ "%.2f"|format(earning.amount) }}</td>
+                    <td>
+                         {% if earning.status == 'paid' %}
+                            <span class="badge bg-success">{{ _('Paid') }}</span>
+                        {% elif earning.status == 'pending' %}
+                             <span class="badge bg-warning">{{ _('Pending') }}</span>
+                        {% elif earning.status == 'cancelled' %}
+                             <span class="badge bg-danger">{{ _('Cancelled') }}</span>
+                        {% else %}
+                            <span class="badge bg-secondary">{{ earning.status|capitalize }}</span>
+                        {% endif %}
+                    </td>
+                     <td>{{ earning.notes or '-' }}</td>
+                    <td class="text-center">
+                         <div class="btn-group btn-group-sm">
+                            <button type="button" class="btn btn-outline-secondary dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+                                {{ _('Change Status') }}
+                            </button>
+                            <ul class="dropdown-menu">
+                                {# Pending Button #}
+                                <li>
+                                    <form action="{{ url_for('admin.update_earning_status', earning_id=earning.id, page=request.args.get('page', 1)) }}" method="post" class="d-inline">
+                                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                                        <input type="hidden" name="status" value="pending">
+                                        <button type="submit" class="dropdown-item {{ 'active' if earning.status == 'pending' }}" {% if earning.status == 'pending' %}disabled{% endif %}>{{ _('Mark as Pending') }}</button>
+                                    </form>
+                                </li>
+                                {# Paid Button #}
+                                <li>
+                                    <form action="{{ url_for('admin.update_earning_status', earning_id=earning.id, page=request.args.get('page', 1)) }}" method="post" class="d-inline">
+                                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                                        <input type="hidden" name="status" value="paid">
+                                        <button type="submit" class="dropdown-item {{ 'active' if earning.status == 'paid' }}" {% if earning.status == 'paid' %}disabled{% endif %}>{{ _('Mark as Paid') }}</button>
+                                    </form>
+                                </li>
+                               {# Cancelled Button - Maybe add a note field here later #}
+                                <li>
+                                     <form action="{{ url_for('admin.update_earning_status', earning_id=earning.id, page=request.args.get('page', 1)) }}" method="post" class="d-inline">
+                                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                                        <input type="hidden" name="status" value="cancelled">
+                                        {# Optional: Add a simple text input for notes if needed directly here #}
+                                        {# <input type="text" name="notes" placeholder="Reason (optional)" class="form-control form-control-sm mb-1"> #}
+                                        <button type="submit" class="dropdown-item {{ 'active' if earning.status == 'cancelled' }}" {% if earning.status == 'cancelled' %}disabled{% endif %}>{{ _('Mark as Cancelled') }}</button>
+                                    </form>
+                                </li>
+                            </ul>
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+     {# Pagination #}
+    <div class="mt-3">
+        {{ render_pagination(pagination, align='center') }}
+    </div>
+    {% else %}
+        <div class="alert alert-info" role="alert">
+            <i class="fas fa-info-circle"></i> {{ _('No affiliate earnings found yet.') }}
+        </div>
+    {% endif %}
+</div>
+{% endblock %} 

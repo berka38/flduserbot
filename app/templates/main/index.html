@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="p-5 mb-4 bg-light rounded-3 shadow-sm">
+        <div class="container-fluid py-5">
+            <h1 class="display-5 fw-bold"><i class="bi bi-telegram me-2"></i>{{ _('Telegram UserBot Management') }}</h1>
+            <p class="col-md-8 fs-4">{{ _('Take your Telegram experience to the next level! Easily manage your userbots, add commands, and create automations with this platform.') }}</p>
+            <hr class="my-4">
+
+            {% if current_user.is_authenticated %}
+                <p class="lead">{{ _('Hello') }}, <strong>{{ current_user.username }}</strong>! {{ _('You can start managing your bots by going to the management panel.') }}</p>
+                <a class="btn btn-primary btn-lg" href="{{ url_for('bot.dashboard') }}" role="button">
+                    <i class="bi bi-sliders me-1"></i> {{ _('Go to Management Panel') }}
+                </a>
+            {% else %}
+                <p>{{ _('Create an account or log in to add your bots and take advantage of all features.') }}</p>
+                <a class="btn btn-primary btn-lg me-2" href="{{ url_for('auth.login') }}" role="button">
+                    <i class="bi bi-box-arrow-in-right me-1"></i> {{ _('Login') }}
+                </a>
+                <a class="btn btn-success btn-lg" href="{{ url_for('auth.register') }}" role="button">
+                    <i class="bi bi-person-plus-fill me-1"></i> {{ _('Register') }}
+                </a>
+            {% endif %}
+        </div>
+    </div>
+
+    {# İleride buraya özellikler, nasıl çalışır gibi bölümler eklenebilir #}
+    {#
+    <div class="row align-items-md-stretch">
+        <div class="col-md-6">
+            <div class="h-100 p-5 text-white bg-dark rounded-3">
+            <h2>{{ _('Features') }}</h2>
+            <p>...</p>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="h-100 p-5 bg-light border rounded-3">
+            <h2>{{ _('How It Works?') }}</h2>
+            <p>...</p>
+            </div>
+        </div>
+    </div>
+    #}
+
+</div>
+{% endblock %} 

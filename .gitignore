@@ -1,0 +1,34 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Virtual environment
+.venv/
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+
+# Environment variables
+.env
+.env.*
+!.env.example
+
+# Instance Folder
+/instance/
+*.sqlite
+*.db
+*.db-journal
+
+# IDE specific files
+.vscode/
+.idea/
+*.sublime-*
+
+# Other
+*.log
+*.tmp
+*.swp 

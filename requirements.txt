@@ -1,0 +1,14 @@
+Flask>=2.0
+Flask-SQLAlchemy>=2.5
+Flask-Migrate>=3.0
+Flask-WTF>=1.2.1
+python-dotenv>=0.15
+Telethon>=1.24
+requests # Gerekirse diye ekleyelim
+Bootstrap-Flask>=1.5
+Flask-Login>=0.6.3 # Kullanıcı oturum yönetimi için
+email-validator>=1.1 # E-posta doğrulaması için 
+gunicorn
+Flask-Babel # Çoklu dil desteği için
+wikipedia # Add wikipedia library
+Pygments # For syntax highlighting

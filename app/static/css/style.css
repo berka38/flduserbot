@@ -1,0 +1,6 @@
+/* Genel stiller */
+body {
+    padding-top: 0; /* Navbar fixed olmadığı için padding'e gerek yok şimdilik */
+}
+
+/* Gerekirse özel stiller buraya eklenecek */ 

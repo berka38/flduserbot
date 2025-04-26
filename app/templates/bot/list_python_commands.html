@@ -1,0 +1,102 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-4">
+    <h3><i class="fab fa-python me-2"></i>{{ _('My Python Commands for Account') }} '{{ account.phone_number }}'</h3>
+    
+    {# Link to Add New Python Command #}
+    <a href="{{ url_for('bot.add_python_command', account_id=account.id) }}" class="btn btn-success btn-sm mb-3">
+        <i class="fas fa-plus"></i> {{ _('Submit New Python Command') }}
+    </a>
+    {# Link back to standard command list #}
+    <a href="{{ url_for('bot.list_custom_commands', account_id=account.id) }}" class="btn btn-secondary btn-sm mb-3">
+        <i class="fas fa-arrow-left"></i> {{ _('Return to Standard Commands') }}
+    </a>
+    <hr>
+
+    {% if commands %}
+    <table class="table table-striped table-hover align-middle">
+        <thead>
+            <tr>
+                <th scope="col">#</th>
+                <th scope="col"><i class="fas fa-terminal"></i> {{ _('Trigger') }}</th>
+                <th scope="col"><i class="fas fa-info-circle"></i> {{ _('Description') }}</th>
+                <th scope="col"><i class="fas fa-tasks"></i> {{ _('Status') }}</th>
+                <th scope="col"><i class="fas fa-calendar-alt"></i> {{ _('Submitted') }}</th>
+                <th scope="col" class="text-end"><i class="fas fa-cogs"></i> {{ _('Actions') }}</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for command in commands %}
+            <tr>
+                <th scope="row">{{ command.id }}</th>
+                <td><code>{{ command.trigger }}</code></td>
+                <td>{{ command.description[:80] }}{% if command.description|length > 80 %}...{% endif %}</td>
+                <td>
+                    {% set status_color = 'secondary' %}
+                    {% if command.status == 'approved' %}
+                        {% set status_color = 'success' %}
+                    {% elif command.status == 'rejected' %}
+                        {% set status_color = 'danger' %}
+                    {% elif command.status == 'pending' %}
+                        {% set status_color = 'warning' %}
+                    {% endif %}
+                    <span class="badge bg-{{ status_color }}">
+                        {{ command.status|capitalize }}
+                    </span>
+                    {% if command.status == 'rejected' and command.review_notes %}
+                         <i class="fas fa-comment-dots ms-1 text-muted" title="{{ _('Review Notes') }}: {{ command.review_notes }}" data-bs-toggle="tooltip"></i>
+                    {% endif %}
+                </td>
+                <td>{{ command.created_at.strftime('%Y-%m-%d') }}</td>
+                <td class="text-end">
+                    {# --- Toggle Public Button --- #}
+                    {% if command.status == 'approved' %}
+                    <form action="{{ url_for('bot.toggle_python_command_public', command_id=command.id) }}" method="post" class="d-inline me-1">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                        <button type="submit" class="btn btn-sm btn-{{ 'secondary' if command.is_public else 'success' }}" 
+                                title="{{ _('Make Private') if command.is_public else _('Make Public on Market') }}">
+                            <i class="fas fa-{{ 'eye-slash' if command.is_public else 'eye' }}"></i>
+                        </button>
+                    </form>
+                    {% endif %}
+                    {# --- End Toggle Public Button --- #}
+
+                    {# View/Edit Button (Maybe only allow editing pending?) #}
+                    {# <a href="#" class="btn btn-sm btn-primary" title="{{ _('View/Edit') }}"><i class="fas fa-eye"></i></a> #}
+                    
+                    {# Delete Button (Maybe only allow deleting pending/rejected?) #}
+                    {% if command.status in ['pending', 'rejected'] %}
+                         {% set confirm_message = _('Are you sure you want to delete the Python command \'%(trigger)s\'?') | format(trigger=command.trigger | replace("'", "\\'")) %}
+                         <form action="#" method="post" class="d-inline ms-1" onsubmit='return confirm("{{ confirm_message }}");'> {# TODO: Add Delete Route #}
+                             <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                            <button type="submit" class="btn btn-sm btn-danger" title="{{ _('Delete Submission') }}">
+                                <i class="fas fa-trash-alt"></i>
+                            </button>
+                        </form>
+                    {% else %}
+                         <button class="btn btn-sm btn-danger" disabled title="{{ _('Cannot delete approved commands') }}"><i class="fas fa-trash-alt"></i></button>
+                    {% endif %}
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+        <div class="alert alert-info" role="alert">
+            <i class="fas fa-info-circle"></i> {{ _('You have not submitted any Python commands for this account yet.') }}
+        </div>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block scripts %}
+{{ super() }} {# Include base scripts #}
+{# Initialize tooltips for review notes #}
+<script>
+    var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+    var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+      return new bootstrap.Tooltip(tooltipTriggerEl)
+    })
+</script>
+{% endblock %} 
