@@ -51,8 +51,15 @@ def index():
     # Prepare data for Chart.js
     user_reg_labels = []
     user_reg_counts = []
-    # Create a dictionary for quick lookup
-    reg_dict = {date.strftime('%Y-%m-%d'): count for date, count in user_reg_data}
+    # Create a dictionary for quick lookup, converting date if necessary
+    reg_dict = {}
+    for date_val, count in user_reg_data:
+        # Check if date_val is a string, if so, parse it
+        if isinstance(date_val, str):
+            date_obj = datetime.fromisoformat(date_val).date()
+        else: # Assume it's already a date/datetime object
+            date_obj = date_val
+        reg_dict[date_obj.strftime('%Y-%m-%d')] = count
     
     # Fill data for the last 7 days, ensuring all days are present
     for i in range(7):
@@ -149,10 +156,14 @@ def edit_user(user_id):
 
     if form.validate_on_submit():
         new_role = form.role.data
+        credit_change = form.credit_adjustment.data or 0 # Get credit change, default to 0 if None
+        
         if user_to_edit == current_user and new_role != 'admin':
              flash(_('You cannot remove your own admin privileges.'), 'danger')
         else:
             user_to_edit.role = new_role
+            user_to_edit.credits += credit_change # Apply credit change
+            
             # --- Add Affiliate Commission Logic --- 
             try:
                 # Check if role changed TO premium AND user was referred

@@ -142,6 +142,17 @@ def market():
     
     commands = public_commands_pagination.items
     
+    # Calculate average rating for each command
+    for command in commands:
+        # Query average rating, handle None case with 0
+        avg_rating = db.session.query(func.avg(CommandRating.rating)) \
+                        .filter(CommandRating.python_command_id == command.id) \
+                        .scalar() or 0
+        # Attach the average rating to the command object for use in the template
+        command.average_rating = avg_rating 
+        # Optional: Also attach number of ratings if needed in the market view
+        # command.num_ratings = command.ratings.count() 
+        
     # Get all categories for display
     all_categories = CommandCategory.query.order_by(CommandCategory.name).all()
     

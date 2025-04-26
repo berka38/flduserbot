@@ -30,8 +30,12 @@ class User(UserMixin, db.Model):
     
     # Points/Credits System
     credits = db.Column(db.Integer, default=0, nullable=False)
+    credits_earned = db.Column(db.Integer, default=0, nullable=False) # Marketten kazanılan toplam kredi
     # OwO Game Fields
     last_hunt_at = db.Column(db.DateTime, nullable=True)
+    
+    # Timestamp for user creation
+    created_at = db.Column(db.DateTime, index=True, default=datetime.utcnow)
     
     # Relationships for affiliate system
     # Users referred by this user
@@ -246,6 +250,7 @@ class PythonCommand(db.Model):
     
     # --- Market Fields ---
     is_public = db.Column(db.Boolean, default=False, nullable=False, index=True)
+    price = db.Column(db.Integer, nullable=False, default=0, index=True) # Price in credits (0 = free)
     original_command_id = db.Column(db.Integer, db.ForeignKey('python_command.id'), nullable=True)
     # --- End Market Fields ---
 

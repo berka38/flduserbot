@@ -14,6 +14,7 @@
                 <th scope="col"><i class="fas fa-user"></i> {{ _('Username') }}</th>
                 <th scope="col"><i class="fas fa-envelope"></i> {{ _('Email') }}</th>
                 <th scope="col"><i class="fas fa-user-tag"></i> {{ _('Role') }}</th>
+                <th scope="col"><i class="fas fa-coins"></i> {{ _('Credits') }}</th>
                 {# Only show Actions column header if user is admin #}
                 {% if current_user.is_admin() %}
                 <th scope="col" class="text-end"><i class="fas fa-cogs"></i> {{ _('Actions') }}</th>
@@ -40,6 +41,7 @@
                         {{ user.role|capitalize }}
                     </span>
                 </td>
+                <td>{{ user.credits }}</td>
                 {# Only show action buttons if logged-in user is admin #}
                 {% if current_user.is_admin() %}
                 <td class="text-end">

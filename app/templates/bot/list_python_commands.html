@@ -51,14 +51,18 @@
                 <td>{{ command.created_at.strftime('%Y-%m-%d') }}</td>
                 <td class="text-end">
                     {# --- Toggle Public Button --- #}
-                    {% if command.status == 'approved' %}
-                    <form action="{{ url_for('bot.toggle_python_command_public', command_id=command.id) }}" method="post" class="d-inline me-1">
-                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
-                        <button type="submit" class="btn btn-sm btn-{{ 'secondary' if command.is_public else 'success' }}" 
-                                title="{{ _('Make Private') if command.is_public else _('Make Public on Market') }}">
-                            <i class="fas fa-{{ 'eye-slash' if command.is_public else 'eye' }}"></i>
-                        </button>
-                    </form>
+                    {# Only show toggle button if command is approved AND it's not a copy from the market #}
+                    {% if command.status == 'approved' and command.original_command_id is none %}
+                        <form action="{{ url_for('bot.toggle_python_command_public', command_id=command.id) }}" method="post" class="d-inline me-1">
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                            <button type="submit" class="btn btn-sm btn-{{ 'secondary' if command.is_public else 'success' }}" 
+                                    title="{{ _('Make Private') if command.is_public else _('Make Public on Market') }}">
+                                <i class="fas fa-{{ 'eye-slash' if command.is_public else 'eye' }}"></i>
+                            </button>
+                        </form>
+                    {# Show disabled button if it's a market copy #}
+                    {% elif command.status == 'approved' and command.original_command_id is not none %}
+                         <button class="btn btn-sm btn-secondary" disabled title="{{ _('Cannot re-publish market commands') }}"><i class="fas fa-eye-slash"></i></button>
                     {% endif %}
                     {# --- End Toggle Public Button --- #}
 
@@ -67,7 +71,9 @@
                     
                     {# Delete Button (Maybe only allow deleting pending/rejected?) #}
                     {% if command.status in ['pending', 'rejected'] %}
-                         {% set confirm_message = _('Are you sure you want to delete the Python command \'%(trigger)s\'?') | format(trigger=command.trigger | replace("'", "\\'")) %}
+                         {# Correct way to format gettext strings with variables #}
+                         {% set trigger_escaped = command.trigger | replace("'", "\\'") %}
+                         {% set confirm_message = _('Are you sure you want to delete the Python command \'%(trigger)s\'?', trigger=trigger_escaped) %}
                          <form action="#" method="post" class="d-inline ms-1" onsubmit='return confirm("{{ confirm_message }}");'> {# TODO: Add Delete Route #}
                              <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
                             <button type="submit" class="btn btn-sm btn-danger" title="{{ _('Delete Submission') }}">

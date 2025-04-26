@@ -47,6 +47,13 @@
             <h5>{{ _('Details') }}</h5>
             <ul class="list-unstyled">
                 <li><strong>{{ _('Rating') }}:</strong> {{ stars.render_stars(avg_rating, num_ratings) }}</li>
+                <li><strong>{{ _('Price') }}:</strong> 
+                    {% if command.price > 0 %}
+                        <i class="fas fa-coins text-warning me-1"></i> {{ _('%(price)s Credits', price=command.price) }}
+                    {% else %}
+                        <span class="text-success"><i class="fas fa-check-circle me-1"></i> {{ _('Free') }}</span>
+                    {% endif %}
+                </li>
                 <li><strong>{{ _('Categories') }}:</strong>
                     {% if command.categories.all() %}
                         {% for cat in command.categories %}

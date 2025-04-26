@@ -128,15 +128,12 @@ def start_login(account_id):
         # Initialize client with StringSession
         session = StringSession() # Yeni StringSession oluştur
         client = TelegramClient(session, api_id, api_hash)
-        print("--- [send_code] Client created with StringSession.") # Log
         try:
             print("--- [send_code] Connecting...") # Log
             await client.connect()
             print("--- [send_code] Connected.") # Log
             
             is_auth = await client.is_user_authorized()
-            print(f"--- [send_code] Is authorized: {is_auth}") # Log
-            
             if not is_auth:
                 print(f"--- [send_code] Sending code request to {phone}...") # Log
                 result = await client.send_code_request(phone)
@@ -153,12 +150,9 @@ def start_login(account_id):
                     'initial_session': initial_session_string # Store the initial string session
                 }
                 account.status = 'pending_code'
-                print("--- [send_code] Updating account status to pending_code") # Log
                 db.session.commit()
                 flash(_('Verification code sent to %(phone)s.', phone=phone), 'success')
-                print("--- [send_code] Disconnecting after sending code.") # Log
                 await client.disconnect() # Disconnect after sending code
-                print("--- [send_code] Disconnected. Returning True.") # Log
                 return True # Başarı
             else:
                 # Zaten giriş yapılmışsa (StringSession ile beklenmez ama kontrol edelim)
@@ -175,9 +169,7 @@ def start_login(account_id):
                     account.status = 'error_session' # Hata durumu
                     db.session.commit()
                 
-                print("--- [send_code] Disconnecting as user was already active.") # Log
                 await client.disconnect()
-                print("--- [send_code] Returning False (already active).") # Log
                 return False # Yönlendirme için False
         except FloodWaitError as e:
             print(f"--- [send_code] FloodWaitError: {e}") # Log
@@ -192,8 +184,7 @@ def start_login(account_id):
                 print(f"!!! Error creating FloodWaitError notification: {notify_err}")
                 db.session.rollback()
             # --- End Notification --- 
-            try: await client.disconnect() 
-            except Exception as dc_err: print(f"--- [send_code] Error disconnecting after FloodWait: {dc_err}")
+            await client.disconnect()
             return False
         except Exception as e:
             print(f"--- [send_code] Generic Exception: {e}") # Log
@@ -212,8 +203,7 @@ def start_login(account_id):
                 print(f"!!! Error creating SendCodeError notification: {notify_err}")
                 db.session.rollback()
             # --- End Notification --- 
-            try: await client.disconnect() 
-            except Exception as dc_err: print(f"--- [send_code] Error disconnecting after generic exception: {dc_err}")
+            await client.disconnect()
             return False
 
     # Asenkron fonksiyonu çalıştır
@@ -270,7 +260,6 @@ def login_code(account_id):
             # Initialize client with the initial StringSession
             session = StringSession(initial_session) 
             client = TelegramClient(session, api_id, api_hash)
-            print("--- [process_code] Client created with initial StringSession.") # Log
             try:
                 print("--- [process_code] Connecting...") # Log
                 await client.connect()
@@ -317,7 +306,6 @@ def login_code(account_id):
                 # Saklanan bilgileri temizle
                 if account.id in current_app.config['PENDING_LOGINS']:
                     del current_app.config['PENDING_LOGINS'][account.id]
-                    print("--- [process_code] Pending login info cleaned up.") # Log
                 
                 print("--- [process_code] Disconnecting...") # Log
                 await client.disconnect()
@@ -337,8 +325,7 @@ def login_code(account_id):
                     print(f"!!! Error creating PhoneCodeInvalidError notification: {notify_err}")
                     db.session.rollback()
                 # --- End Notification ---
-                try: await client.disconnect() 
-                except Exception as dc_err: print(f"--- [process_code] Error disconnecting after PhoneCodeInvalidError: {dc_err}")
+                await client.disconnect()
                 return False
             except SessionPasswordNeededError:
                  print("--- [process_code] SessionPasswordNeededError") # Log
@@ -358,8 +345,7 @@ def login_code(account_id):
                      print(f"!!! Error creating SessionPasswordNeededError notification: {notify_err}")
                      db.session.rollback()
                  # --- End Notification ---
-                 try: await client.disconnect() 
-                 except Exception as dc_err: print(f"--- [process_code] Error disconnecting after SessionPasswordNeededError: {dc_err}")
+                 await client.disconnect()
                  return False
             except FloodWaitError as e:
                  print(f"--- [process_code] FloodWaitError: {e}") # Log
@@ -374,8 +360,7 @@ def login_code(account_id):
                      print(f"!!! Error creating FloodWaitError notification (login_code): {notify_err}")
                      db.session.rollback()
                  # --- End Notification ---
-                 try: await client.disconnect() 
-                 except Exception as dc_err: print(f"--- [process_code] Error disconnecting after FloodWait: {dc_err}")
+                 await client.disconnect()
                  return False
             except Exception as e:
                 print(f"--- [process_code] Generic Exception: {e}") # Log
@@ -397,8 +382,7 @@ def login_code(account_id):
                     print(f"!!! Error creating CodeVerificationError notification: {notify_err}")
                     db.session.rollback()
                 # --- End Notification ---
-                try: await client.disconnect() 
-                except Exception as dc_err: print(f"--- [process_code] Error disconnecting after generic exception: {dc_err}")
+                await client.disconnect()
                 return False
 
         # Asenkron fonksiyonu çalıştır
@@ -438,7 +422,6 @@ def delete_bot(account_id):
     if account.id in current_app.config['PENDING_LOGINS']:
         try:
             del current_app.config['PENDING_LOGINS'][account.id]
-            print(f"--- Removed pending login info for account {account_id}")
         except KeyError:
             pass # Zaten yoksa sorun değil
 
@@ -449,7 +432,6 @@ def delete_bot(account_id):
             print(f"--- Deleted session file: {session_path}")
         if os.path.exists(session_journal_path):
             os.remove(session_journal_path) # SQLite journal dosyasını da sil
-            print(f"--- Deleted session journal file: {session_journal_path}")
     except Exception as e:
         print(f"--- Error deleting session files for account {account_id}: {e}")
         flash('Hesap veritabanından silindi ancak session dosyaları silinirken bir hata oluştu.', 'warning')
@@ -722,10 +704,11 @@ def add_python_command(account_id):
         flash(_('You do not have permission to add commands to this account.'), 'danger')
         return redirect(url_for('bot.dashboard'))
         
-    # Optional: Add check for premium/admin status if Python commands are restricted
-    # if not current_user.is_premium() and not current_user.is_admin():
-    #     flash(_('Only Premium or Admin users can submit Python commands.'), 'warning')
-    #     return redirect(url_for('bot.list_custom_commands', account_id=account.id))
+    # Premium/Admin kontrolü eklendi
+    if not current_user.is_premium() and not current_user.is_admin():
+        flash(_('Only Premium or Admin users can submit Python commands.'), 'warning')
+        # Python komutları listesine yönlendir
+        return redirect(url_for('bot.list_python_commands', account_id=account.id))
 
     form = AddPythonCommandForm(account_id=account.id)
     if form.validate_on_submit():
@@ -736,6 +719,7 @@ def add_python_command(account_id):
                 trigger=form.trigger.data.strip(),
                 description=form.description.data,
                 code_body=form.code_body.data,
+                price=form.price.data,
                 status='pending' # Initial status
             )
             
@@ -796,30 +780,41 @@ def toggle_python_command_public(command_id):
         flash(_('Only approved commands can be made public.'), 'warning')
         return redirect(url_for('bot.list_python_commands', account_id=command.account_id))
 
+    # Prevent making copies from the market public again
+    if command.original_command_id is not None and not command.is_public:
+        flash(_('Commands added from the market cannot be made public again.'), 'warning')
+        return redirect(url_for('bot.list_python_commands', account_id=command.account_id))
+
+    # Sadece premium/admin kullanıcıların public yapabilmesini sağla (private yapmaya izin ver)
+    if not command.is_public and (not current_user.is_premium() and not current_user.is_admin()):
+        flash(_('Only Premium or Admin users can make commands public.'), 'warning')
+        return redirect(url_for('bot.list_python_commands', account_id=command.account_id))
+
     try:
         was_private = not command.is_public
         command.is_public = not command.is_public
         
         success_message = ''
-        if was_private and command.is_public:
-            submitter = command.submitter
-            if submitter:
-                 submitter.credits += REWARD_FOR_MAKING_PUBLIC
-                 db.session.add(submitter)
-                 status_text = _('public')
-                 success_message = _('Command \'{trigger}\' successfully set to {status} (+{reward} credits).').format(
-                        trigger=command.trigger, status=status_text, reward=REWARD_FOR_MAKING_PUBLIC
-                    )
-            else:
-                 status_text = _('public')
-                 success_message = _('Command \'{trigger}\' successfully set to {status} (Could not award credits: Submitter not found).').format(
-                        trigger=command.trigger, status=status_text
-                    )
-        else:
-            status_text = _('public') if command.is_public else _('private')
-            success_message = _('Command \'{trigger}\' successfully set to {status}.').format(
-                    trigger=command.trigger, status=status_text
-                )
+        # --- Removed credit awarding logic ---
+        # if was_private and command.is_public:
+        #     submitter = command.submitter
+        #     if submitter:
+        #          submitter.credits += REWARD_FOR_MAKING_PUBLIC
+        #          db.session.add(submitter)
+        #          status_text = _('public')
+        #          success_message = _('Command \'{trigger}\' successfully set to {status} (+{reward} credits).').format(
+        #                 trigger=command.trigger, status=status_text, reward=REWARD_FOR_MAKING_PUBLIC
+        #             )
+        #     else:
+        #          status_text = _('public')
+        #          success_message = _('Command \'{trigger}\' successfully set to {status} (Could not award credits: Submitter not found).').format(
+        #                 trigger=command.trigger, status=status_text
+        #             )
+        # else:
+        status_text = _('public') if command.is_public else _('private')
+        success_message = _('Command \'{trigger}\' successfully set to {status}.').format(
+                trigger=command.trigger, status=status_text
+            )
         
         db.session.add(command)
         db.session.commit()
@@ -836,110 +831,111 @@ def toggle_python_command_public(command_id):
 @bp.route('/add_from_market/<int:original_command_id>/select', methods=['GET', 'POST'])
 @login_required
 def add_command_from_market_select_account(original_command_id):
-    """Shows a form to select which account to add a market command to."""
+    """Shows form to select account AND handles adding the command on POST.""" # Updated docstring
     original_command = PythonCommand.query.filter_by(
         id=original_command_id, 
         is_public=True, 
         status='approved'
-        ).first_or_404()
+        ).first_or_404() # Use first_or_404 here
 
     user_accounts = current_user.telegram_accounts.all()
     
-    # Check if user has any accounts
     if not user_accounts:
         flash(_('You need to add a bot account first before adding market commands.'), 'warning')
-        return redirect(url_for('main.market')) # Redirect back to market
+        return redirect(url_for('main.market'))
 
     form = SelectAccountForMarketCommandForm(user_accounts=user_accounts)
 
     if form.validate_on_submit():
         target_account_id = form.account.data
-        # Redirect to the actual adding route (POST request)
-        # Pass original command ID and selected account ID
-        # This will be handled by a separate route to keep logic clean
-        return redirect(url_for('bot.add_command_from_market_add',
-                                original_command_id=original_command_id,
-                                target_account_id=target_account_id))
+        
+        # --- Start: Logic moved from add_command_from_market_add --- 
+        
+        # --- Get Target Account and Verify Ownership --- 
+        target_account = TelegramAccount.query.get(target_account_id)
+        # Check if account exists and belongs to current user
+        if not target_account or target_account.user_id != current_user.id:
+            flash(_('Invalid target account selected.'), 'danger')
+            # Instead of redirecting to market, maybe re-render select form?
+            return redirect(url_for('bot.add_command_from_market_select_account', original_command_id=original_command_id))
+            
+        # --- Check Credits --- 
+        command_price = original_command.price # Get the command's price
+        if current_user.credits < command_price:
+             flash(_('You need at least %(cost)s credits to add this command (%(trigger)s). You currently have %(balance)s credits.', 
+                     cost=command_price, 
+                     trigger=original_command.trigger, 
+                     balance=current_user.credits), 'warning')
+             # Redirect back to the selection page for this command
+             return redirect(url_for('bot.add_command_from_market_select_account', original_command_id=original_command_id))
+            
+        # --- Check for Trigger Collision --- 
+        existing_py_command = PythonCommand.query.filter_by(account_id=target_account.id, trigger=original_command.trigger).first()
+        existing_custom_command = CustomCommand.query.filter_by(account_id=target_account.id, trigger=original_command.trigger).first()
+        
+        if existing_py_command or existing_custom_command:
+            flash(_('A command with the trigger \'%(trigger)s\' already exists for the account %(phone)s.', 
+                    trigger=original_command.trigger, phone=target_account.phone_number), 'warning')
+            return redirect(url_for('bot.add_command_from_market_select_account', original_command_id=original_command_id))
 
+        # --- Create and Save the New Command --- 
+        try:
+            new_command = PythonCommand(
+                account_id=target_account.id,
+                submitted_by_user_id=current_user.id, 
+                trigger=original_command.trigger, 
+                description=original_command.description, 
+                code_body=original_command.code_body, 
+                status='approved',
+                is_public=False, 
+                original_command_id=original_command.id, 
+                review_notes=f"Copied from Market (Original ID: {original_command.id})" 
+            )
+            current_user.credits -= command_price # Alıcının kredisini düşür
+
+            # Satıcıyı bul ve kredisini/kazancını artır
+            seller = User.query.get(original_command.submitted_by_user_id)
+            if seller and seller.id != current_user.id: # Satıcı varsa ve alıcıyla aynı kişi değilse
+                seller.credits += command_price
+                seller.credits_earned += command_price
+                db.session.add(seller) # Değişiklikleri session'a ekle
+                print(f"--- Transferred {command_price} credits to seller {seller.id} for command {original_command.id}") # Log
+            elif seller and seller.id == current_user.id:
+                print(f"--- Self-purchase detected for command {original_command.id}, no credit transfer.") # Log
+            else:
+                print(f"!!! Could not find seller with ID {original_command.submitted_by_user_id} to transfer credits for command {original_command.id}") # Log
+
+            db.session.add(new_command)
+            db.session.add(current_user) # Alıcının kredi değişikliğini session'a ekle
+            db.session.commit()
+            
+            flash(_('Command \'%(trigger)s\' successfully added to account %(phone)s from the market (-%(cost)s credits).', 
+                    trigger=new_command.trigger, 
+                    phone=target_account.phone_number, 
+                    cost=command_price), 'success') # Use actual price in message
+            # Redirect to the list of commands for the target account
+            return redirect(url_for('bot.list_python_commands', account_id=target_account.id))
+            
+        except IntegrityError as e:
+            db.session.rollback()
+            print(f"!!! IntegrityError adding market command {original_command.id} to account {target_account.id}: {e}")
+            flash(_('A database error occurred (trigger collision?). Please try again.'), 'danger')
+            return redirect(url_for('bot.add_command_from_market_select_account', original_command_id=original_command_id))
+        except Exception as e:
+            db.session.rollback()
+            print(f"!!! Error adding market command {original_command.id} to account {target_account.id}: {e}")
+            flash(_('An unexpected error occurred while adding the command.'), 'danger')
+            return redirect(url_for('bot.add_command_from_market_select_account', original_command_id=original_command_id))
+        # --- End: Logic moved from add_command_from_market_add --- 
+
+    # GET request or form validation failed: Render the selection template
     return render_template('bot/add_from_market_select.html',
                            title=_('Add Market Command'),
                            command=original_command,
                            form=form)
 
-# Route to actually add the command from market to the selected account
-@bp.route('/add_from_market/<int:original_command_id>/add/<int:target_account_id>', methods=['POST']) # Use POST, get IDs from URL
-@login_required
-def add_command_from_market_add(original_command_id, target_account_id):
-    """Copies a public command from the market to the user's selected account, deducting credits."""
-    
-    # --- Get Original Command --- 
-    original_command = PythonCommand.query.filter_by(
-        id=original_command_id, 
-        is_public=True, 
-        status='approved'
-        ).first()
-    if not original_command:
-        flash(_('The command you are trying to add was not found or is not public.'), 'danger')
-        return redirect(url_for('main.market'))
-
-    # --- Get Target Account and Verify Ownership --- 
-    target_account = TelegramAccount.query.get(target_account_id)
-    if not target_account or target_account.user_id != current_user.id:
-        flash(_('Invalid target account selected.'), 'danger')
-        return redirect(url_for('main.market'))
-        
-    # --- Check Credits --- 
-    if current_user.credits < COMMAND_ADD_COST:
-         flash(_('You need at least %(cost)s credits to add a command from the market. You currently have %(balance)s credits.', 
-                 cost=COMMAND_ADD_COST, balance=current_user.credits), 'warning')
-         # Redirect back to market or selection page?
-         return redirect(url_for('main.market'))
-        
-    # --- Check for Trigger Collision --- 
-    # Check if a command (Python or Custom) with the same trigger already exists for the target account
-    existing_py_command = PythonCommand.query.filter_by(account_id=target_account.id, trigger=original_command.trigger).first()
-    existing_custom_command = CustomCommand.query.filter_by(account_id=target_account.id, trigger=original_command.trigger).first()
-    
-    if existing_py_command or existing_custom_command:
-        flash(_('A command with the trigger \'%(trigger)s\' already exists for the account %(phone)s.', 
-                trigger=original_command.trigger, phone=target_account.phone_number), 'warning')
-        return redirect(url_for('bot.add_command_from_market_select_account', original_command_id=original_command_id))
-
-    # --- Create and Save the New Command --- 
-    try:
-        new_command = PythonCommand(
-            account_id=target_account.id,
-            submitted_by_user_id=current_user.id, 
-            trigger=original_command.trigger, 
-            description=original_command.description, 
-            code_body=original_command.code_body, 
-            status='approved',
-            is_public=False, 
-            original_command_id=original_command.id, 
-            review_notes=f"Copied from Market (Original ID: {original_command.id})" 
-        )
-        # Deduct credits *before* adding the command to DB
-        current_user.credits -= COMMAND_ADD_COST
-        
-        db.session.add(new_command)
-        # We also need to add the user to the session because we modified the credits
-        db.session.add(current_user) 
-        db.session.commit()
-        
-        flash(_('Command \'%(trigger)s\' successfully added to account %(phone)s from the market (-%(cost)s credits).', 
-                trigger=new_command.trigger, phone=target_account.phone_number, cost=COMMAND_ADD_COST), 'success')
-        return redirect(url_for('bot.list_python_commands', account_id=target_account.id))
-        
-    except IntegrityError as e:
-        db.session.rollback()
-        print(f"!!! IntegrityError adding market command {original_command.id} to account {target_account.id}: {e}")
-        flash(_('A database error occurred (trigger collision?). Please try again.'), 'danger')
-        return redirect(url_for('bot.add_command_from_market_select_account', original_command_id=original_command_id))
-    except Exception as e:
-        db.session.rollback()
-        print(f"!!! Error adding market command {original_command.id} to account {target_account.id}: {e}")
-        flash(_('An unexpected error occurred while adding the command.'), 'danger')
-        return redirect(url_for('bot.add_command_from_market_select_account', original_command_id=original_command_id))
+# --- Route Removed: add_command_from_market_add --- 
+# The logic has been moved into the POST handler of add_command_from_market_select_account
 
 # TODO: Add routes for editing/deleting pending python commands?
 

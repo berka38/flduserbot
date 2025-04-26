@@ -96,6 +96,12 @@ class AddPythonCommandForm(FlaskForm):
                             render_kw={'rows': 15},
                             validators=[DataRequired(message=_l("This field is required."))]
                             )
+    # Price Field
+    price = IntegerField(
+        _l('Price (Credits, 0 for Free)'), 
+        default=0, 
+        validators=[Optional(), NumberRange(min=0, message=_l("Price cannot be negative."))]
+        ) # Price field, defaults to 0, cannot be negative
     # Category Selection
     categories = SelectMultipleField(
         _l('Categories (Optional)'), 
