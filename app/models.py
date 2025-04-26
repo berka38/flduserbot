@@ -6,12 +6,11 @@ import uuid # For generating affiliate codes
 import decimal # For commission amounts
 
 # --- Association Table for User <-> AffiliateLink (Referral Tracking) ---
-# Define this BEFORE the User class that uses it.
-user_referrer = db.Table('user_referrer', db.metadata,
-    db.Column('user_id', db.Integer, db.ForeignKey('user.id'), primary_key=True),
-    db.Column('affiliate_link_id', db.Integer, db.ForeignKey('affiliate_link.id'), primary_key=True)
-    # Note: affiliate_link.id assumes the AffiliateLink model's primary key is 'id'. Adjust if needed.
-)
+# !!! Temporarily removed definition as AffiliateLink model is missing !!!
+# user_referrer = db.Table('user_referrer', db.metadata,
+#     db.Column('user_id', db.Integer, db.ForeignKey('user.id'), primary_key=True),
+#     db.Column('affiliate_link_id', db.Integer, db.ForeignKey('affiliate_link.id'), primary_key=True)
+# )
 
 class User(UserMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True)
